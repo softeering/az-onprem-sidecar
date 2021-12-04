@@ -5,9 +5,9 @@ public class DnsUpdaterOptions
 	// COMMON
 	public bool Enabled { get; set; }
 	public string Provider { get; set; } = "Azure";
-	public TimeSpan Interval { get; set; }
+	public TimeSpan? Interval { get; set; } = TimeSpan.FromMinutes(10);
 	public RecordItem[]? Records { get; set; }
-	public TimeSpan TTL { get; set; } = TimeSpan.FromSeconds(300);
+	public TimeSpan? TTL { get; set; } = TimeSpan.FromMinutes(5);
 
 	// AZURE
 	public string? ResourceGroup { get; set; }

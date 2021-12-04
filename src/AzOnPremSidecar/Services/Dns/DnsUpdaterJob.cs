@@ -26,7 +26,7 @@ public class DnsUpdaterJob : BackgroundService
 
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			var interval = this._options.Interval;
+			var interval = this._options.Interval.GetValueOrDefault(TimeSpan.FromMinutes(10));
 
 			try
 			{
