@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using SoftEEring.Core.Helpers;
 
 namespace AzOnPremSidecar.Services.Dns;
 
@@ -25,6 +26,8 @@ public class DnsUpdaterJob : BackgroundService
 
 		while (!stoppingToken.IsCancellationRequested)
 		{
+			var interval = this._options.Interval;
+
 			try
 			{
 				foreach (var record in this._options.Records)
@@ -38,19 +41,21 @@ public class DnsUpdaterJob : BackgroundService
 						else
 						{
 							this._logger.LogInformation($"Updating Dns entry {record.Zone} / {record.Record}...");
-							await this._dnsUpdater.UpdateDnsEntry(record.Zone, record.Record);
+							await RetryUtil.WithRetryAsync(() => this._dnsUpdater.UpdateDnsEntry(record.Zone, record.Record));
 							this._logger.LogInformation($"Done updating Dns entry {record.Zone} / {record.Record}");
 						}
 					}
 					catch (Exception error)
 					{
 						this._logger.LogError(error, $"An error occurred while updating Dns entry {record.Zone} / {record.Record}");
+						// we divide the interval by 2 since the update failed
+						interval /= 2;
 					}
 				}
 			}
 			finally
 			{
-				await Task.Delay(this._options.Interval, stoppingToken);
+				await Task.Delay(interval, stoppingToken);
 			}
 		}
 	}
