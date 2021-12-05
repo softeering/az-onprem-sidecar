@@ -1,4 +1,8 @@
-using AzOnPremSidecar.Services.Dns;
+using AzOnPremSideca.Dns.Services;
+using AzOnPremSidecar.Dns.Config;
+using AzOnPremSidecar.Telemetry.Config;
+using AzOnPremSidecar.Telemetry.Services;
+using AzOnPremSidecar.Utils;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 var options = new WebApplicationOptions
@@ -14,7 +18,7 @@ builder.Services.Configure<DnsUpdaterOptions>(builder.Configuration.GetSection("
 var dnsUpdaterOptions = builder.Configuration.GetSection("DnsUpdater").Get<DnsUpdaterOptions>();
 
 builder.Services.AddOptions();
-builder.Services.AddHttpClient<IPublicIpProvider, PublicIpProvider>(); // .AddTransientHttpErrorPolicy(policy => policy.RetryAsync(3));
+builder.Services.AddHttpClient<IHostInfoProvider, WindowsHostInfoProvider>(); // .AddTransientHttpErrorPolicy(policy => policy.RetryAsync(3));
 
 if (dnsUpdaterOptions?.Enabled ?? false)
 {
@@ -26,6 +30,21 @@ if (dnsUpdaterOptions?.Enabled ?? false)
 	};
 
 	builder.Services.AddHostedService<DnsUpdaterJob>();
+}
+
+builder.Services.Configure<MetricsUpdaterOptions>(builder.Configuration.GetSection("MetricsUpdater"));
+var metricsUpdaterOptions = builder.Configuration.GetSection("MetricsUpdater").Get<MetricsUpdaterOptions>();
+
+if (metricsUpdaterOptions?.Enabled ?? false)
+{
+	_ = metricsUpdaterOptions.Provider.ToLower() switch
+	{
+		"azure" => builder.Services.AddSingleton<IMetricsPublisher, AzureMonitorMetricsPublisher>(),
+		"aws" => builder.Services.AddSingleton<IMetricsPublisher, AwsCloudwatchMetricsPublisher>(),
+		_ => throw new NotImplementedException($"Unknown Metrics publisher {metricsUpdaterOptions.Provider}")
+	};
+
+	builder.Services.AddHostedService<MetricsUpdaterJob>();
 }
 
 builder.Services.AddControllers();

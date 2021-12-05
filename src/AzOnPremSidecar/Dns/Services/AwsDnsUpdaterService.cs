@@ -1,17 +1,19 @@
 ﻿using Amazon;
 using Amazon.Route53;
 using Amazon.Route53.Model;
+using AzOnPremSidecar.Dns.Config;
+using AzOnPremSidecar.Utils;
 using Microsoft.Extensions.Options;
 using System.Net;
 
-namespace AzOnPremSidecar.Services.Dns;
+namespace AzOnPremSideca.Dns.Services;
 
 public class AwsDnsUpdaterService : IDnsUpdater
 {
 	private readonly DnsUpdaterOptions _options;
-	private readonly IPublicIpProvider _ipProvider;
+	private readonly IHostInfoProvider _ipProvider;
 
-	public AwsDnsUpdaterService(IOptions<DnsUpdaterOptions> options, IPublicIpProvider ipProvider)
+	public AwsDnsUpdaterService(IOptions<DnsUpdaterOptions> options, IHostInfoProvider ipProvider)
 	{
 		this._options = options.Value;
 		this._ipProvider = ipProvider;
@@ -26,7 +28,7 @@ public class AwsDnsUpdaterService : IDnsUpdater
 
 		var recordSet = new ResourceRecordSet(record, RRType.A)
 		{
-			TTL = (long)this._options.TTL.TotalSeconds,
+			TTL = (long)(this._options.TTL?.TotalSeconds).GetValueOrDefault(300),
 			ResourceRecords = records
 		};
 

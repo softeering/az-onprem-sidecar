@@ -1,4 +1,4 @@
-﻿namespace AzOnPremSidecar.Services.Dns;
+﻿namespace AzOnPremSidecar.Dns.Config;
 
 public class DnsUpdaterOptions
 {

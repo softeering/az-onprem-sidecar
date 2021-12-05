@@ -1,4 +1,4 @@
-﻿namespace AzOnPremSidecar.Services.Dns;
+﻿namespace AzOnPremSideca.Dns.Services;
 
 public interface IDnsUpdater
 {

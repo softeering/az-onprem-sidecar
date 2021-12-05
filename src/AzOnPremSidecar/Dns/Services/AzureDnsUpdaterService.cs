@@ -1,17 +1,18 @@
-﻿using AzOnPremSidecar.Utils;
+﻿using AzOnPremSidecar.Dns.Config;
+using AzOnPremSidecar.Utils;
 using Microsoft.Azure.Management.Dns;
 using Microsoft.Azure.Management.Dns.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest.Azure.Authentication;
 
-namespace AzOnPremSidecar.Services.Dns;
+namespace AzOnPremSideca.Dns.Services;
 
 public class AzureDnsUpdaterService : IDnsUpdater
 {
 	private readonly DnsUpdaterOptions _options;
-	private readonly IPublicIpProvider _ipProvider;
+	private readonly IHostInfoProvider _ipProvider;
 
-	public AzureDnsUpdaterService(IOptions<DnsUpdaterOptions> options, IPublicIpProvider ipProvider)
+	public AzureDnsUpdaterService(IOptions<DnsUpdaterOptions> options, IHostInfoProvider ipProvider)
 	{
 		this._options = options.Value;
 		this._ipProvider = ipProvider;
@@ -28,7 +29,7 @@ public class AzureDnsUpdaterService : IDnsUpdater
 
 		var recordSet = new RecordSet()
 		{
-			TTL = (long)this._options.TTL.TotalSeconds,
+			TTL = (long)(this._options.TTL?.TotalSeconds).GetValueOrDefault(300),
 			ARecords = new List<ARecord>() { new ARecord(ip) },
 			Metadata = new Dictionary<string, string>()
 			{

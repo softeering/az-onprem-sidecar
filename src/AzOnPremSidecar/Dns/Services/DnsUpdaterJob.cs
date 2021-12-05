@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using AzOnPremSidecar.Dns.Config;
+using Microsoft.Extensions.Options;
 using SoftEEring.Core.Helpers;
 
-namespace AzOnPremSidecar.Services.Dns;
+namespace AzOnPremSideca.Dns.Services;
 
 public class DnsUpdaterJob : BackgroundService
 {
